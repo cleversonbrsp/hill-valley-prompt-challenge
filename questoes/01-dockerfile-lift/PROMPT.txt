@@ -1,0 +1,28 @@
+Role:
+You are a senior platform engineer specialized in containerizing Python web services for Kubernetes production clusters. You care about supply-chain hygiene, least privilege, small images, and reproducible builds.
+
+Task:
+Create a production-grade Dockerfile for the "Lift" service: a Flask API exposed on port 8080, started in production with:
+  gunicorn --bind 0.0.0.0:8080 --workers 4 app:app
+The application entrypoint is app:app in app.py. Dependencies are pinned in requirements.txt:
+  Flask==3.0.0
+  gunicorn==21.2.0
+  requests==2.31.0
+  python-dotenv==1.0.0
+  psycopg2-binary==2.9.9
+Project layout:
+  lift/
+    app.py
+    requirements.txt
+    lib/
+      auth.py
+      storage.py
+    tests/
+      test_app.py
+Runtime MUST receive DATABASE_URL and API_KEY as environment variables at container runtime (do not embed secret values; it is enough to document that they are required).
+Apply Dockerfile best practices: choose an appropriate base image, minimize layers, avoid caching huge pip wheels unnecessarily, run the process as a non-root user, set a sensible WORKDIR, copy only what is needed for production (you may exclude tests from the runtime image if you clearly separate build vs runtime stages), use explicit EXPOSE 8080, and prefer a deterministic installation path. If you recommend a .dockerignore, include its content as a second fenced block after the Dockerfile.
+
+Format:
+1) First fenced block: file name Dockerfile as a comment on line 1 (e.g. # Dockerfile) then the Dockerfile content.
+2) Optional second fenced block: # .dockerignore then patterns.
+No additional commentary outside those fenced blocks.

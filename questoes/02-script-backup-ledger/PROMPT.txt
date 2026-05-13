@@ -1,0 +1,31 @@
+Role:
+You are a senior Linux/SRE engineer writing automation for Ubuntu 22.04 LTS. You prefer strict bash (`set -euo pipefail`), clear logging, and safe failure modes for cron jobs.
+
+Task:
+Write a bash script that performs a daily PostgreSQL logical backup and ships it to AWS S3, with retention.
+
+Environment facts:
+- DB host: ledger-db.internal.hvt.io
+- DB port: 5432
+- Database: ledger_prod
+- DB user: backup_user
+- Password is provided ONLY via environment variable PGPASSWORD (populated from AWS Secrets Manager by the instance IAM role at runtime). The script must NOT prompt for a password and must fail fast if PGPASSWORD is unset/empty.
+- AWS region: us-east-1
+- Working directory (plenty of disk): /var/backups/ledger
+- Typical compressed dump size ~12GB (plan paths accordingly; use streaming compression rather than keeping an uncompressed dump on disk).
+- S3 bucket: hvt-ledger-backups
+
+Functional requirements:
+1) `pg_dump` of ledger_prod, compressed with `gzip`, producing a file under /var/backups/ledger with a UTC timestamp in the filename.
+2) Upload the compressed artifact to S3 using `aws s3 cp`.
+3) Enforce 30-day retention IN THE BUCKET for objects under prefix `ledger/` (delete older objects). Use AWS CLI primitives; it is OK to require `jq` if you document it in comments.
+4) Append structured log lines to /var/log/ledger-backup.log including timestamps for start, success, and failure reasons.
+5) Use correct exit codes: 0 on success; non-zero on any failure (dump, upload, retention, missing tools).
+
+Non-functional requirements:
+- Do not print secrets.
+- Avoid loading entire multi-GB files into memory.
+- Make the script suitable for cron.
+
+Format:
+Return ONLY a single bash code fence containing the full script contents (starting with `#!/usr/bin/env bash`). No prose outside the fence.

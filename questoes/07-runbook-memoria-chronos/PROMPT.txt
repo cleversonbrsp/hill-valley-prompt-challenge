@@ -1,0 +1,25 @@
+Role:
+You are Lorraine Baines’ senior SRE teammate writing operational documentation for a mixed-skill on-call rotation. Assume readers can run kubectl/aws/argocd CLIs but may not know Chronos internals.
+
+Input:
+- Alert (Beacon/Slack): [CRITICAL] High memory usage on Chronos API pods (>85% for 10min)
+- Workload: Chronos on EKS, namespace production, currently 6 replicas (HPA min 4 max 12, CPU target 70%)
+- Deploy: Argo CD syncing repo hvt/chronos-api
+- Dependencies: Ledger (PostgreSQL) and Reactor (SQS)
+- Observability: /metrics on the service, logs centralized in Beacon, dashboards in Grafana
+- Tools available: kubectl, aws cli, argocd cli
+- Comms: Slack channel #oncall-chronos
+- Escalation: @chronos-core SLA 15m business hours, 30m outside
+
+Steps:
+Create a procedural runbook with numbered steps. EACH step must include:
+1) commands to run (exactly as copy/paste blocks)
+2) what “good” looks like (expected signals)
+3) when to stop and escalate (objective criteria)
+Also include a short preamble with incident triage goals.
+
+Expectation:
+End with explicit “resolve” and “close incident” criteria, plus a template Slack update line for #oncall-chronos.
+
+Output format:
+Markdown with headings and bullet lists. English is OK for commands; short Portuguese labels are OK in headings.

@@ -1,0 +1,43 @@
+Context:
+Hill Valley Tech (HVT) mandates an internal Terraform module style for AWS resources. Every resource must include tags: Owner, CostCenter, Environment. Resource Name tags and physical names must use prefix `hvt-`. S3 buckets must have: SSE-S3 encryption at minimum, versioning enabled, full S3 Block Public Access, and server access logging configured.
+
+Action:
+Write a reusable Terraform module that creates ONE primary S3 bucket compliant with the policy, plus the minimal extra AWS resources required to satisfy "logging configured" in a typical pattern (a separate access-logs bucket is OK). Use AWS provider resources compatible with AWS provider 5.x style.
+
+Result:
+Deliver these files as separate ```hcl fenced blocks with a first-line comment indicating filename:
+- variables.tf (every variable MUST have description + type)
+- locals.tf (optional) OR locals inside main.tf
+- main.tf
+- outputs.tf
+- README snippet is NOT required; instead include `examples/basic/main.tf` showing module consumption passing owner/cost_center/environment and a bucket suffix.
+
+Example (style reference only — do not copy VPC semantics literally):
+variable "environment" {
+  description = "Nome do ambiente (dev, staging, production)"
+  type        = string
+}
+
+locals {
+  common_tags = {
+    Owner       = var.owner
+    CostCenter  = var.cost_center
+    Environment = var.environment
+  }
+}
+
+resource "aws_vpc" "this" {
+  cidr_block = var.cidr_block
+  tags = merge(local.common_tags, {
+    Name = "hvt-vpc-${var.environment}"
+  })
+}
+
+Hard requirements for the S3 module:
+- Variables at minimum: owner (string), cost_center (string), environment (string), bucket_suffix (string) where the primary bucket name becomes `hvt-${bucket_suffix}-${environment}` (all lower-case enforced in locals).
+- Apply common_tags to every resource via merge(...).
+- Enforce encryption, versioning, public access block, and logging from primary -> logs bucket with a clear target prefix.
+- Do not set public ACLs. No public access.
+
+Output constraints:
+ONLY fenced blocks as specified, no extra prose.

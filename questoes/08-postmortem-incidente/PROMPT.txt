@@ -1,0 +1,44 @@
+Task:
+Write a **20-minute technical postmortem** for Doc Brown (CTO) during an active production incident peak. The output must help decide between:
+A) rollback Chronos deploy to v2.47.0 (remove v2.48.0), vs
+B) emergency scaling (increase RDS limits + increase app DB pool / connection strategy).
+
+Action:
+Use ONLY the facts below. Structure your answer as:
+1) Executive summary (5 bullets max)
+2) Timeline (UTC) correlating deploy + metric inflection + log signals
+3) Hypotheses ranked with evidence for/against
+4) Blast radius (user impact, dependencies: Ledger, Reactor)
+5) Decision recommendation with **primary** and **fallback** path, including risks and verification steps after each action
+6) “What we still don’t know” + instrumentation gaps
+
+Goal:
+Be decisive and technical. Quantify where possible. Explicitly reconcile the apparent contradiction: memory alert vs CPU/memory averages vs logs showing DB pool exhaustion.
+
+Facts:
+- Deploy: chronos-api v2.47.0 -> v2.48.0; Argo CD sync 2026-04-23 18:42:11 UTC
+- Changelog v2.48.0:
+  - Added POST /v2/transactions/batch
+  - Refactored Ledger client (pool moved to internal library)
+  - psycopg 3.1.18 -> 3.2.0
+  - Ledger client timeout 5s -> 2s
+- Beacon metrics:
+  2026-04-24 13:30 UTC p99=420ms req=1200 err=0.2%
+  2026-04-24 13:45 UTC p99=510ms req=1450 err=0.3%
+  2026-04-24 14:00 UTC p99=780ms req=1780 err=0.8%
+  2026-04-24 14:10 UTC p99=2400ms req=2100 err=4.5%
+  2026-04-24 14:15 UTC p99=5200ms req=2400 err=8.2%
+  2026-04-24 14:20 UTC p99=8100ms req=2650 err=11.7%
+- Pod log excerpt chronos-api-79c4d8b9-xk2jp:
+  2026-04-24 14:19:48 ERROR ledger-client connection pool exhausted (max=20 active=20 waiting=147)
+  2026-04-24 14:19:49 WARN ledger-client query timeout after 2000ms SELECT ... transactions ...
+  2026-04-24 14:19:49 ERROR handler POST /v2/transactions/batch failed context deadline exceeded
+  2026-04-24 14:19:50 ERROR ledger-client connection reset by peer
+  2026-04-24 14:19:51 WARN circuit-breaker ledger-client OPEN (threshold 50% current 87%)
+  2026-04-24 14:19:52 ERROR reactor failed to publish message chronos-api upstream error
+- Reactor queue chronos-transactions: ~50127 messages backlog growing ~800/min; consumer lag ~18m increasing
+- Cluster: Chronos 12/12 pods running (HPA max). CPU avg pods 62%. Memory avg pods 71%.
+- Ledger/RDS: active connections 240/250 (limit)
+
+Output format:
+Markdown headings. No code fences required. Keep it tight but complete.

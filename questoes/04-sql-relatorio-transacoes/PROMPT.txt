@@ -1,0 +1,24 @@
+Task:
+Generate a single PostgreSQL query for Jennifer (PM) that consolidates Ledger transactions for an executive readout.
+
+Action:
+Use ONLY these tables/columns (do not invent tables):
+- transactions(id, customer_id, category, amount_cents, status, payment_method, created_at, completed_at)
+- customers exists but is NOT required for this report unless needed.
+
+Business rules:
+- Include ONLY transactions with status = 'completed'.
+- Categories in scope: subscription, one_time, refund, credit_adjustment.
+- Time window: rolling **6 calendar months ending on 2026-04-24 (inclusive of that full calendar day)** in **America/Sao_Paulo** timezone boundaries. Implement this as:
+  - lower bound = start of day 2026-04-24 in America/Sao_Paulo, minus 6 months
+  - upper bound = start of day 2026-04-25 in America/Sao_Paulo (exclusive upper bound)
+- Group by:
+  - month as YYYY-MM based on transaction time in America/Sao_Paulo (use date_trunc month in that zone)
+  - category
+- Metrics per row:
+  - transaction_count = COUNT(*)
+  - total_brl = SUM(amount_cents)/100 rounded to 2 decimal places in output (NUMERIC/DECIMAL with 2dp is fine)
+- Order by month ascending, then category ascending.
+
+Goal:
+Return ONLY the SQL as one fenced ```sql code block, with no explanations outside the fence.
