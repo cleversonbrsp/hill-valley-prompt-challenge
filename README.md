@@ -35,18 +35,14 @@ git commit -m "Entrega: prompts, outputs e justificativas (8 questões)"
 gh repo create hill-valley-prompt-challenge --public --source=. --remote=origin --push
 ```
 
-Substitua o nome do repositório se preferir. Se `gh` não estiver autenticado, crie o repositório vazio no GitHub e:
+Se `gh` não estiver autenticado, crie o repositório vazio no GitHub e:
 
 ```bash
-git remote add origin https://github.com/<seu-usuario>/hill-valley-prompt-challenge.git
+git remote add origin https://github.com/cleversonbrsp/hill-valley-prompt-challenge.git
 git branch -M main
 git push -u origin main
 ```
 
-## Link da entrega
+## Link da entrega (repositório público)
 
-Após o push, coloque a URL pública aqui e no arquivo do curso:
-
-`https://github.com/<seu-usuario>/hill-valley-prompt-challenge`
-
-*(Substitua `<seu-usuario>` após criar o repositório.)*
+https://github.com/cleversonbrsp/hill-valley-prompt-challenge
