@@ -38,10 +38,11 @@ locals {
     Environment = var.environment
   }
 
-  bucket_suffix_clean = lower(replace(var.bucket_suffix, "_", "-"))
+  environment_clean   = lower(var.environment)
+  bucket_suffix_clean   = lower(replace(var.bucket_suffix, "_", "-"))
 
-  primary_bucket_name = "hvt-${local.bucket_suffix_clean}-${var.environment}"
-  logs_bucket_name    = "hvt-${local.bucket_suffix_clean}-logs-${var.environment}"
+  primary_bucket_name = "hvt-${local.bucket_suffix_clean}-${local.environment_clean}"
+  logs_bucket_name    = "hvt-${local.bucket_suffix_clean}-logs-${local.environment_clean}"
 }
 
 resource "aws_s3_bucket" "logs" {
